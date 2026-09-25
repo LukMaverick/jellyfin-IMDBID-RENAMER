@@ -24,6 +24,19 @@ public static class FileRenamerService
 
         name = name.Replace("()", string.Empty, StringComparison.Ordinal).Trim();
 
+        // Znaki niedozwolone w Windows (np. dwukropek) są legalne w Linuksie, ale powodują
+        // "mangled names" (skrócone nazwy 8.3) przy udostępnianiu przez Sambę klientom Windows.
+        // Zamieniamy je niezależnie od systemu hosta, żeby nazwa działała wszędzie.
+        name = name
+            .Replace(": ", " - ", StringComparison.Ordinal)
+            .Replace(":", " -", StringComparison.Ordinal)
+            .Replace("<", string.Empty, StringComparison.Ordinal)
+            .Replace(">", string.Empty, StringComparison.Ordinal)
+            .Replace("\"", "'", StringComparison.Ordinal)
+            .Replace("|", "-", StringComparison.Ordinal)
+            .Replace("?", string.Empty, StringComparison.Ordinal)
+            .Replace("*", string.Empty, StringComparison.Ordinal);
+
         var invalidChars = Path.GetInvalidFileNameChars();
         return new string(name.Where(c => !invalidChars.Contains(c)).ToArray()).Trim();
     }
