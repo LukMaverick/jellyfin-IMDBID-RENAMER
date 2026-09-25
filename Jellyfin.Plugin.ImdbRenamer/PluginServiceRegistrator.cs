@@ -14,5 +14,7 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
     public void RegisterServices(IServiceCollection serviceCollection, IServerApplicationHost applicationHost)
     {
         serviceCollection.AddSingleton<MetadataResolver>();
+        serviceCollection.AddSingleton<ItemProcessor>();
+        serviceCollection.AddHostedService<LibraryWatcherService>();
     }
 }
