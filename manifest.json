@@ -9,12 +9,12 @@
     "imageUrl": "",
     "versions": [
       {
-        "version": "1.0.0.2",
+        "version": "1.0.0.3",
         "targetAbi": "12.1.0.0",
-        "sourceUrl": "https://github.com/LukMaverick/jellyfin-IMDBID-RENAMER/releases/download/v1.0.0.2/jellyfin-plugin-imdb-renamer_1.0.0.2.zip",
-        "checksum": "33053db40b68127334f57b466d51ab6d",
+        "sourceUrl": "https://github.com/LukMaverick/jellyfin-IMDBID-RENAMER/releases/download/v1.0.0.3/jellyfin-plugin-imdb-renamer_1.0.0.3.zip",
+        "checksum": "28d90387573f55b6f2bae85487562c53",
         "timestamp": "2026-09-25T00:00:00Z",
-        "changelog": "Naprawa: script byl poza div[data-role=page], przez co strona konfiguracji nie zapisywala ustawien."
+        "changelog": "Obsluga tokenu TMDb v4 (Bearer) obok klasycznego klucza v3."
       }
     ]
   }

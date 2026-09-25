@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading;
@@ -87,16 +89,25 @@ public class MetadataResolver
         try
         {
             var client = _httpClientFactory.CreateClient();
+            // Token v4 (Read Access Token) to JWT wysyłany przez nagłówek Authorization: Bearer.
+            var isBearerToken = apiKey.Count(c => c == '.') == 2;
             var mediaType = isSeries ? "tv" : "movie";
             var encodedQuery = HttpUtility.UrlEncode(query);
             var yearParam = year.HasValue
                 ? (isSeries ? $"&first_air_date_year={year}" : $"&year={year}")
                 : string.Empty;
 
+            var apiKeyParam = isBearerToken ? string.Empty : $"api_key={apiKey}&";
             var searchUrl =
-                $"{TmdbBaseUrl}/search/{mediaType}?api_key={apiKey}&language=pl-PL&query={encodedQuery}{yearParam}";
+                $"{TmdbBaseUrl}/search/{mediaType}?{apiKeyParam}language=pl-PL&query={encodedQuery}{yearParam}";
 
-            using var searchResponse = await client.GetAsync(new Uri(searchUrl), cancellationToken)
+            using var searchRequest = new HttpRequestMessage(HttpMethod.Get, new Uri(searchUrl));
+            if (isBearerToken)
+            {
+                searchRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+            }
+
+            using var searchResponse = await client.SendAsync(searchRequest, cancellationToken)
                 .ConfigureAwait(false);
             if (!searchResponse.IsSuccessStatusCode)
             {
@@ -127,8 +138,16 @@ public class MetadataResolver
                 resolvedYear = parsedDate.Year;
             }
 
-            var externalIdsUrl = $"{TmdbBaseUrl}/{mediaType}/{tmdbId}/external_ids?api_key={apiKey}";
-            using var externalResponse = await client.GetAsync(new Uri(externalIdsUrl), cancellationToken)
+            var externalIdsUrl = isBearerToken
+                ? $"{TmdbBaseUrl}/{mediaType}/{tmdbId}/external_ids"
+                : $"{TmdbBaseUrl}/{mediaType}/{tmdbId}/external_ids?api_key={apiKey}";
+            using var externalRequest = new HttpRequestMessage(HttpMethod.Get, new Uri(externalIdsUrl));
+            if (isBearerToken)
+            {
+                externalRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+            }
+
+            using var externalResponse = await client.SendAsync(externalRequest, cancellationToken)
                 .ConfigureAwait(false);
             if (!externalResponse.IsSuccessStatusCode)
             {
