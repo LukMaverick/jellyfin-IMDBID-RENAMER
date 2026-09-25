@@ -124,19 +124,53 @@ public class MetadataResolver
                 return null;
             }
 
-            var first = results[0];
-            var tmdbId = first.GetProperty("id").GetInt32();
-            var title = isSeries
-                ? first.GetProperty("name").GetString() ?? query
-                : first.GetProperty("title").GetString() ?? query;
-
-            int? resolvedYear = null;
             var dateField = isSeries ? "first_air_date" : "release_date";
-            if (first.TryGetProperty(dateField, out var dateEl) &&
-                DateTime.TryParse(dateEl.GetString(), out var parsedDate))
+            var titleField = isSeries ? "name" : "title";
+
+            JsonElement? best = null;
+            int? bestYear = null;
+
+            // Jeśli znamy rok, odrzucamy dopasowania, których rok znacząco odbiega
+            // (zapobiega myleniu sequeli/spin-offów o tym samym tytule).
+            var candidateCount = Math.Min(results.GetArrayLength(), 10);
+            for (var i = 0; i < candidateCount; i++)
             {
-                resolvedYear = parsedDate.Year;
+                var candidate = results[i];
+                int? candidateYear = null;
+                if (candidate.TryGetProperty(dateField, out var candidateDateEl) &&
+                    DateTime.TryParse(candidateDateEl.GetString(), out var candidateDate))
+                {
+                    candidateYear = candidateDate.Year;
+                }
+
+                if (!year.HasValue)
+                {
+                    best = candidate;
+                    bestYear = candidateYear;
+                    break;
+                }
+
+                if (candidateYear.HasValue && Math.Abs(candidateYear.Value - year.Value) <= 1)
+                {
+                    best = candidate;
+                    bestYear = candidateYear;
+                    break;
+                }
             }
+
+            if (best is null)
+            {
+                _logger.LogWarning(
+                    "Pominięto dopasowanie TMDb dla \"{Query}\" ({Year}) — żaden wynik nie pasował rokiem",
+                    query,
+                    year);
+                return null;
+            }
+
+            var first = best.Value;
+            var tmdbId = first.GetProperty("id").GetInt32();
+            var title = first.GetProperty(titleField).GetString() ?? query;
+            var resolvedYear = bestYear;
 
             var externalIdsUrl = isBearerToken
                 ? $"{TmdbBaseUrl}/{mediaType}/{tmdbId}/external_ids"

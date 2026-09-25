@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Data.Enums;
@@ -118,8 +119,10 @@ public class ImdbLookupRenameTask : IScheduledTask
                 ? episode.Series.Name
                 : item.Name;
 
+            var yearHint = item.ProductionYear ?? ExtractYearFromPath(item.Path);
+
             var lookup = await _metadataResolver
-                .ResolveAsync(searchTitle, item.ProductionYear, isSeries, cancellationToken)
+                .ResolveAsync(searchTitle, yearHint, isSeries, cancellationToken)
                 .ConfigureAwait(false);
 
             if (lookup is null)
@@ -140,7 +143,7 @@ public class ImdbLookupRenameTask : IScheduledTask
                 var newFileName = FileRenamerService.BuildFileName(
                     config.FileNameTemplate,
                     lookup.Title,
-                    lookup.Year ?? item.ProductionYear);
+                    lookup.Year ?? yearHint);
 
                 var newPath = FileRenamerService.RenameFile(item.Path, newFileName);
                 if (!string.Equals(newPath, item.Path, StringComparison.OrdinalIgnoreCase))
@@ -156,5 +159,16 @@ public class ImdbLookupRenameTask : IScheduledTask
         {
             _logger.LogError(ex, "Nie udało się zmienić nazwy pliku dla \"{Name}\"", item.Name);
         }
+    }
+
+    private static int? ExtractYearFromPath(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return null;
+        }
+
+        var match = Regex.Match(path, @"(?<!\d)(19\d{2}|20\d{2})(?!\d)");
+        return match.Success && int.TryParse(match.Value, out var year) ? year : null;
     }
 }
