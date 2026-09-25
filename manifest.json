@@ -4,15 +4,15 @@
     "name": "IMDb Renamer",
     "description": "Uzupełnia IMDb ID i zmienia nazwy plików wideo na czyste tytuły.",
     "overview": "Automatyczne uzupełnianie IMDb ID + porządkowanie nazw plików.",
-    "owner": "twoj-user",
+    "owner": "LukMaverick",
     "category": "General",
     "imageUrl": "",
     "versions": [
       {
         "version": "1.0.0.0",
         "targetAbi": "12.1.0.0",
-        "sourceUrl": "https://github.com/twoj-user/jellyfin-plugin-imdb-renamer/releases/download/v1.0.0.0/jellyfin-plugin-imdb-renamer_1.0.0.0.zip",
-        "checksum": "UZUPEŁNIJ_PO_ZBUDOWANIU_ZIP",
+        "sourceUrl": "https://github.com/LukMaverick/jellyfin-IMDBID-RENAMER/releases/download/v1.0.0.0/jellyfin-plugin-imdb-renamer_1.0.0.0.zip",
+        "checksum": "fd77dcde1597553cf68fca4ffff61d27",
         "timestamp": "2026-09-25T00:00:00Z",
         "changelog": "Wersja początkowa."
       }
