@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IMDb Renamer</title>
+</head>
+<body>
+    <div id="ImdbRenamerConfigPage" data-role="page" class="page type-interior pluginConfigurationPage">
+        <div data-role="content">
+            <div class="content-primary">
+                <form id="ImdbRenamerConfigForm">
+                    <div class="verticalSection">
+                        <h2>IMDb Renamer</h2>
+                        <p>
+                            Wtyczka wyszukuje IMDb ID w TMDb (z fallbackiem do OMDb), zapisuje je w metadanych
+                            pozycji oraz opcjonalnie zmienia nazwę pliku na "Tytuł (Rok).ext".
+                        </p>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="TmdbApiKey">Klucz API TMDb</label>
+                        <input id="TmdbApiKey" name="TmdbApiKey" type="text" is="emby-input" />
+                        <div class="fieldDescription">Wymagany. Uzyskaj na themoviedb.org/settings/api</div>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="OmdbApiKey">Klucz API OMDb (fallback)</label>
+                        <input id="OmdbApiKey" name="OmdbApiKey" type="text" is="emby-input" />
+                        <div class="fieldDescription">Opcjonalny. Uzyskaj na omdbapi.com/apikey.aspx</div>
+                    </div>
+
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label>
+                            <input id="OverwriteExistingImdbId" name="OverwriteExistingImdbId" type="checkbox" is="emby-checkbox" />
+                            <span>Nadpisuj istniejące IMDb Id</span>
+                        </label>
+                    </div>
+
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label>
+                            <input id="RenameFiles" name="RenameFiles" type="checkbox" is="emby-checkbox" />
+                            <span>Zmieniaj nazwy plików na dysku</span>
+                        </label>
+                    </div>
+
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label>
+                            <input id="IncludeSeries" name="IncludeSeries" type="checkbox" is="emby-checkbox" />
+                            <span>Obejmij również seriale/odcinki</span>
+                        </label>
+                    </div>
+
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="FileNameTemplate">Szablon nazwy pliku</label>
+                        <input id="FileNameTemplate" name="FileNameTemplate" type="text" is="emby-input" />
+                        <div class="fieldDescription">Dostępne tokeny: {Title}, {Year}</div>
+                    </div>
+
+                    <div>
+                        <button is="emby-button" type="submit" class="raised button-submit block emby-button">
+                            <span>Zapisz</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var ImdbRenamerConfig = {
+            pluginUniqueId: '2f6a7c1e-4b3d-4a9a-9e6b-6c7a3d9b5e21'
+        };
+
+        document.querySelector('#ImdbRenamerConfigPage')
+            .addEventListener('pageshow', function () {
+                Dashboard.showLoadingMsg();
+                ApiClient.getPluginConfiguration(ImdbRenamerConfig.pluginUniqueId).then(function (config) {
+                    document.querySelector('#TmdbApiKey').value = config.TmdbApiKey || '';
+                    document.querySelector('#OmdbApiKey').value = config.OmdbApiKey || '';
+                    document.querySelector('#OverwriteExistingImdbId').checked = config.OverwriteExistingImdbId || false;
+                    document.querySelector('#RenameFiles').checked = config.RenameFiles || false;
+                    document.querySelector('#IncludeSeries').checked = config.IncludeSeries || false;
+                    document.querySelector('#FileNameTemplate').value = config.FileNameTemplate || '{Title} ({Year})';
+                    Dashboard.hideLoadingMsg();
+                });
+            });
+
+        document.querySelector('#ImdbRenamerConfigForm')
+            .addEventListener('submit', function (e) {
+                Dashboard.showLoadingMsg();
+                ApiClient.getPluginConfiguration(ImdbRenamerConfig.pluginUniqueId).then(function (config) {
+                    config.TmdbApiKey = document.querySelector('#TmdbApiKey').value;
+                    config.OmdbApiKey = document.querySelector('#OmdbApiKey').value;
+                    config.OverwriteExistingImdbId = document.querySelector('#OverwriteExistingImdbId').checked;
+                    config.RenameFiles = document.querySelector('#RenameFiles').checked;
+                    config.IncludeSeries = document.querySelector('#IncludeSeries').checked;
+                    config.FileNameTemplate = document.querySelector('#FileNameTemplate').value;
+
+                    ApiClient.updatePluginConfiguration(ImdbRenamerConfig.pluginUniqueId, config).then(function (result) {
+                        Dashboard.processPluginConfigurationUpdateResult(result);
+                    });
+                });
+                e.preventDefault();
+                return false;
+            });
+    </script>
+</body>
+</html>

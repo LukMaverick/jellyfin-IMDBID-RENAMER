@@ -1,0 +1,14 @@
+name: "Jellyfin.Plugin.ImdbRenamer"
+guid: "2f6a7c1e-4b3d-4a9a-9e6b-6c7a3d9b5e21"
+version: "1.0.0.0"
+targetAbi: "10.9.0.0"
+framework: "net8.0"
+owner: "twoj-user"
+overview: "Uzupełnia IMDb ID i zmienia nazwy plików wideo na czyste tytuły."
+description: >
+  Wtyczka wyszukuje IMDb ID dla pozycji biblioteki (filmy i opcjonalnie seriale)
+  za pomocą TMDb, z fallbackiem do OMDb, zapisuje je w metadanych oraz opcjonalnie
+  zmienia nazwę pliku wideo na format "Tytuł (Rok).ext".
+category: "General"
+artifacts:
+  - "Jellyfin.Plugin.ImdbRenamer.dll"

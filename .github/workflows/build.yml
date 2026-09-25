@@ -1,0 +1,36 @@
+name: Build plugin
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore
+        run: dotnet restore Jellyfin.Plugin.ImdbRenamer/Jellyfin.Plugin.ImdbRenamer.csproj
+
+      - name: Build
+        run: dotnet build Jellyfin.Plugin.ImdbRenamer/Jellyfin.Plugin.ImdbRenamer.csproj -c Release --no-restore
+
+      - name: Package
+        run: |
+          mkdir -p dist
+          cd Jellyfin.Plugin.ImdbRenamer/bin/Release/net8.0
+          zip -r ../../../../dist/jellyfin-plugin-imdb-renamer.zip .
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jellyfin-plugin-imdb-renamer
+          path: dist/jellyfin-plugin-imdb-renamer.zip
