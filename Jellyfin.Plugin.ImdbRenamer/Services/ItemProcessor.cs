@@ -50,11 +50,27 @@ public class ItemProcessor
             }
 
             var isSeries = item is Episode;
-            var searchTitle = isSeries && item is Episode episode && episode.Series is not null
-                ? episode.Series.Name
-                : item.Name;
+            string searchTitle;
+            int? yearHint;
 
-            var yearHint = item.ProductionYear ?? ExtractYearFromPath(item.Path);
+            if (isSeries && item is Episode episode && episode.Series is not null)
+            {
+                // Dla odcinków ufamy nazwie serialu z Jellyfin — jest zwykle stabilniejsza
+                // niż nazwa pliku pojedynczego odcinka.
+                searchTitle = episode.Series.Name;
+                yearHint = item.ProductionYear ?? ExtractYearFromPath(item.Path);
+            }
+            else
+            {
+                // Nie ufamy bezpośrednio Item.Name — jeśli Jellyfin błędnie sparsował
+                // nazwę (np. przez uszkodzone nawiasy w release name), przekazywałoby to
+                // dalej całkowicie inny tytuł do wyszukania. Parsujemy własnoręcznie z pliku/folderu.
+                var (parsedTitle, parsedYear) = ReleaseNameParser.ParseFromPath(item.Path);
+                searchTitle = !string.IsNullOrWhiteSpace(parsedTitle) && parsedTitle.Length >= 2
+                    ? parsedTitle
+                    : item.Name;
+                yearHint = item.ProductionYear ?? parsedYear ?? ExtractYearFromPath(item.Path);
+            }
 
             var lookup = await _metadataResolver
                 .ResolveAsync(searchTitle, yearHint, isSeries, cancellationToken)

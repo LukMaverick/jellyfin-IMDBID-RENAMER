@@ -9,12 +9,12 @@
     "imageUrl": "",
     "versions": [
       {
-        "version": "1.0.0.5",
+        "version": "1.0.0.6",
         "targetAbi": "12.1.0.0",
-        "sourceUrl": "https://github.com/LukMaverick/jellyfin-IMDBID-RENAMER/releases/download/v1.0.0.5/jellyfin-plugin-imdb-renamer_1.0.0.5.zip",
-        "checksum": "ae3940a063b153f8f60882aa9cf96481",
+        "sourceUrl": "https://github.com/LukMaverick/jellyfin-IMDBID-RENAMER/releases/download/v1.0.0.6/jellyfin-plugin-imdb-renamer_1.0.0.6.zip",
+        "checksum": "886000501dbb965c1c03cf5f656b38a0",
         "timestamp": "2026-09-25T00:00:00Z",
-        "changelog": "Automatyczne przetwarzanie nowych plikow wykrytych w bibliotece (bez czekania na harmonogram)."
+        "changelog": "Parsowanie tytulu z nazwy pliku zamiast poleganiu na (czasem blednym) Item.Name z Jellyfin."
       }
     ]
   }
